@@ -3,7 +3,6 @@ package token
 import (
 	"io/ioutil"
 
-	"github.com/cfabrica46/go-crud/structure"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"
 )
@@ -28,7 +27,7 @@ func GenerateToken(id int, username, email, keyFile string, jwtMethod *jwt.Signi
 	return
 }
 
-func ExtractUserFromClaims(tokenString, keyFile string, jwtMethod *jwt.SigningMethodHMAC) (user structure.User, err error) {
+func ExtractUserFromClaims(tokenString, keyFile string, jwtMethod *jwt.SigningMethodHMAC) (id int, username, email string, err error) {
 	token, err := jwt.Parse(tokenString, keyFunc(jwtMethod, keyFile))
 	if err != nil {
 		return
@@ -36,15 +35,9 @@ func ExtractUserFromClaims(tokenString, keyFile string, jwtMethod *jwt.SigningMe
 
 	claims := token.Claims.(jwt.MapClaims)
 
-	id := claims["id"].(int)
-	user.ID = id
-
-	username := claims["username"].(string)
-	user.Username = username
-
-	email := claims["email"].(string)
-	user.Email = email
-
+	id = claims["id"].(int)
+	username = claims["username"].(string)
+	email = claims["email"].(string)
 	return
 }
 

@@ -44,15 +44,15 @@ func GetUserFromToken(c *gin.Context) {
 		return
 	}
 
-	user, err := token.ExtractUserFromClaims(tokenStructure.Token, "key.pem", jwt.SigningMethodHS256)
+	id, username, email, err := token.ExtractUserFromClaims(tokenStructure.Token, "key.pem", jwt.SigningMethodHS256)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, structure.ResponseHTTP{Code: http.StatusInternalServerError, ErrorText: "Error Verifying Token"})
 		return
 	}
 
-	c.Set("id", user.ID)
-	c.Set("username", user.Username)
-	c.Set("email", user.Email)
+	c.Set("id", id)
+	c.Set("username", username)
+	c.Set("email", email)
 	c.Set("token", tokenStructure.Token)
 	c.Next()
 }
