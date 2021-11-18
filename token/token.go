@@ -27,7 +27,7 @@ func GenerateToken(id int, username, email, keyFile string, jwtMethod *jwt.Signi
 	return
 }
 
-func ExtractUserFromClaims(tokenString, keyFile string, jwtMethod *jwt.SigningMethodHMAC) (id int, username, email string, err error) {
+func ExtractClaims(tokenString, keyFile string, jwtMethod *jwt.SigningMethodHMAC) (id int, username, email string, err error) {
 	token, err := jwt.Parse(tokenString, keyFunc(jwtMethod, keyFile))
 	if err != nil {
 		return
