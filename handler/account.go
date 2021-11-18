@@ -13,7 +13,7 @@ func SignUp(c *gin.Context) {
 	password := c.MustGet("password").(string)
 	email := c.MustGet("email").(string)
 
-	id, err := user.InsertUser(username, password)
+	id, err := userdb.InsertUser(username, password)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"ErrMessage": "Username is already in use",
