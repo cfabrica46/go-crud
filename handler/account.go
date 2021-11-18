@@ -28,6 +28,12 @@ func SignUp(c *gin.Context) {
 		return
 	}
 
+	err = cache.SetToken(userToken)
+	if err != nil {
+		c.JSON(http.StatusConflict, structure.ResponseHTTP{Code: http.StatusConflict, ErrorText: "Conflict to set Token"})
+		return
+	}
+
 	c.JSON(http.StatusOK, structure.ResponseHTTP{Code: http.StatusOK, Content: userToken})
 }
 
