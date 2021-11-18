@@ -31,7 +31,7 @@ func SetToken(token string) (err error) {
 	return
 }
 
-func CheckIfTokenIsInTheBlackList(token string) (check bool, err error) {
+func CheckIfTokenItsValid(token string) (check bool, err error) {
 	index, err := getTokenHash(token)
 	if err != nil {
 		return

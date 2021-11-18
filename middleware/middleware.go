@@ -34,12 +34,12 @@ func GetUserFromToken(c *gin.Context) {
 		return
 	}
 
-	check, err := cache.CheckIfTokenIsInTheBlackList(tokenStructure.Token)
+	check, err := cache.CheckIfTokenItsValid(tokenStructure.Token)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, structure.ResponseHTTP{Code: http.StatusInternalServerError, ErrorText: "Error Verifying Token"})
 		return
 	}
-	if check {
+	if !check {
 		c.JSON(http.StatusUnauthorized, structure.ResponseHTTP{Code: http.StatusUnauthorized, ErrorText: "Token Is Blacklisted"})
 		return
 	}
