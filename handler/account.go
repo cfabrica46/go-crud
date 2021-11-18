@@ -3,6 +3,8 @@ package handler
 import (
 	"net/http"
 
+	"github.com/cfabrica46/go-crud/database/userdb"
+	"github.com/cfabrica46/go-crud/structure"
 	"github.com/cfabrica46/go-crud/token"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
@@ -13,23 +15,17 @@ func SignUp(c *gin.Context) {
 	password := c.MustGet("password").(string)
 	email := c.MustGet("email").(string)
 
-	id, err := userdb.InsertUser(username, password)
+	id, err := userdb.InsertUser(username, password, email)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"ErrMessage": "Username is already in use",
-		})
+		c.JSON(http.StatusConflict, structure.ResponseHTTP{Code: http.StatusConflict, ErrorText: "Conflict to insert user"})
 		return
 	}
 
-	userToken, err := token.GenerateToken(id, username, email, "private.key", jwt.SigningMethodHS256)
+	userToken, err := token.GenerateToken(id, username, email, "key.pem", jwt.SigningMethodHS256)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"ErrMessage": "Internal Error",
-		})
+		c.JSON(http.StatusInternalServerError, structure.ResponseHTTP{Code: http.StatusInternalServerError, ErrorText: "Error Creating Token"})
 		return
 	}
 
-	// token := structure.Token{Content: user.Token}
-
-	c.JSON(http.StatusOK, userToken)
+	c.JSON(http.StatusOK, structure.ResponseHTTP{Code: http.StatusOK, Content: userToken})
 }

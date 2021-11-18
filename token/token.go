@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func GenerateToken(id, username, email, keyFile string, jwtMethod *jwt.SigningMethodHMAC) (tokenString string, err error) {
+func GenerateToken(id int, username, email, keyFile string, jwtMethod *jwt.SigningMethodHMAC) (tokenString string, err error) {
 	secret, err := ioutil.ReadFile(keyFile)
 	if err != nil {
 		return
@@ -36,7 +36,7 @@ func ExtractUserFromClaims(tokenString, keyFile string, jwtMethod *jwt.SigningMe
 
 	claims := token.Claims.(jwt.MapClaims)
 
-	id := claims["id"].(string)
+	id := claims["id"].(int)
 	user.ID = id
 
 	username := claims["username"].(string)
