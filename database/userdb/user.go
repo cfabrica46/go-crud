@@ -14,7 +14,7 @@ func GetAllUsers() (users []structure.User, err error) {
 
 	for rows.Next() {
 		var userBeta structure.User
-		err = rows.Scan(&userBeta.ID, &userBeta.Username, &userBeta.Role)
+		err = rows.Scan(&userBeta.ID, &userBeta.Username, &userBeta.Email)
 		if err != nil {
 			return
 		}
