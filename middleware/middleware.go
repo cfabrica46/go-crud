@@ -19,7 +19,9 @@ func GetUserFromBody(c *gin.Context) {
 		return
 	}
 
-	c.Set("user", user)
+	c.Set("username", user.Username)
+	c.Set("password", user.Password)
+	c.Set("email", user.Email)
 	c.Next()
 }
 
