@@ -50,6 +50,9 @@ func GetUserFromToken(c *gin.Context) {
 		return
 	}
 
-	c.Set("user", user)
+	c.Set("id", user.ID)
+	c.Set("username", user.Username)
+	c.Set("email", user.Email)
+	c.Set("token", tokenStructure.Token)
 	c.Next()
 }

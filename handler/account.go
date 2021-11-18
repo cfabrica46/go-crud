@@ -66,3 +66,15 @@ func SignIn(c *gin.Context) {
 
 	c.JSON(http.StatusOK, structure.ResponseHTTP{Code: http.StatusOK, Content: userToken})
 }
+
+func LogOut(c *gin.Context) {
+	userToken := c.MustGet("token").(string)
+
+	err := cache.DeleteTokenUsingValue(userToken)
+	if err != nil {
+		c.JSON(http.StatusConflict, structure.ResponseHTTP{Code: http.StatusConflict, ErrorText: "Conflict to logout"})
+		return
+	}
+
+	c.JSON(http.StatusOK, structure.ResponseHTTP{Code: http.StatusOK})
+}

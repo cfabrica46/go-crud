@@ -19,15 +19,25 @@ func Open() {
 }
 
 func SetToken(token string) (err error) {
-	index, err := getTokenHash(token)
+	key, err := getTokenHash(token)
 	if err != nil {
 		return
 	}
 
-	err = db.Set(index, token, time.Minute*10).Err()
+	err = db.Set(key, token, time.Minute*10).Err()
 	if err != nil {
 		return
 	}
+	return
+}
+
+func DeleteTokenUsingValue(token string) (err error) {
+	key, err := getTokenHash(token)
+	if err != nil {
+		return
+	}
+
+	err = db.Del(key).Err()
 	return
 }
 
