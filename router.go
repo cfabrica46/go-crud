@@ -24,8 +24,8 @@ func setupRouter() (r *gin.Engine) {
 		getuserFromToken := s.Group("/")
 		getuserFromToken.Use(middleware.GetUserFromToken)
 		{
-			getuserFromToken.GET("/logout", handler.Profile)
-			getuserFromToken.DELETE("/logout", handler.DeleteUser)
+			getuserFromToken.GET("/user", handler.Profile)
+			getuserFromToken.DELETE("/user/delete", handler.DeleteUser)
 			getuserFromToken.HEAD("/logout", handler.LogOut)
 		}
 	}

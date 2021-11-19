@@ -14,5 +14,5 @@ type ResponseHTTP struct {
 }
 
 type Token struct {
-	Token string `json:"Authorization-header"`
+	Token string `header:"Authorization"`
 }

@@ -3,11 +3,11 @@ package main
 import (
 	"log"
 
-	"github.com/cfabrica46/go-crud/database/user"
+	"github.com/cfabrica46/go-crud/database/userdb"
 )
 
 func main() {
-	defer user.Close()
+	defer userdb.Close()
 
 	r := setupRouter()
 

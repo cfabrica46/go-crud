@@ -8,6 +8,10 @@ import (
 
 var db *redis.Client
 
+func init() {
+	Open()
+}
+
 func Open() {
 	options := &redis.Options{
 		Addr:     "localhost:6379",
@@ -42,12 +46,12 @@ func DeleteTokenUsingValue(token string) (err error) {
 }
 
 func CheckIfTokenItsValid(token string) (check bool, err error) {
-	index, err := getTokenHash(token)
+	key, err := getTokenHash(token)
 	if err != nil {
 		return
 	}
 
-	result, err := db.Get(index).Result()
+	result, err := db.Get(key).Result()
 	if err != nil {
 		if err.Error() == redis.Nil.Error() {
 			err = nil
@@ -59,6 +63,5 @@ func CheckIfTokenItsValid(token string) (check bool, err error) {
 	if result == token {
 		check = true
 	}
-
 	return
 }

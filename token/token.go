@@ -35,7 +35,9 @@ func ExtractClaims(tokenString, keyFile string, jwtMethod *jwt.SigningMethodHMAC
 
 	claims := token.Claims.(jwt.MapClaims)
 
-	id = claims["id"].(int)
+	idAux := claims["id"].(float64)
+	id = int(idAux)
+
 	username = claims["username"].(string)
 	email = claims["email"].(string)
 	return
