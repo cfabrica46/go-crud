@@ -15,4 +15,4 @@ token=$(echo "$response" | jq -r '.content')
 #curl -X GET http://localhost:8080/api/v1/user -H "Authorization: $token"
 
 #Delete
-# curl -X DELETE http://localhost:8080/api/v1/user/delete -H "Authorization: $token"
+# curl -X DELETE http://localhost:8080/api/v1/user -H "Authorization: $token"
