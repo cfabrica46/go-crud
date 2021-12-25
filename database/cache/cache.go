@@ -23,12 +23,7 @@ func Open() {
 }
 
 func SetToken(token string) (err error) {
-	key, err := getTokenHash(token)
-	if err != nil {
-		return
-	}
-
-	err = db.Set(key, token, time.Minute*10).Err()
+	err = db.Set(token, true, time.Minute*10).Err()
 	if err != nil {
 		return
 	}
@@ -36,22 +31,11 @@ func SetToken(token string) (err error) {
 }
 
 func DeleteTokenUsingValue(token string) (err error) {
-	key, err := getTokenHash(token)
-	if err != nil {
-		return
-	}
-
-	err = db.Del(key).Err()
-	return
+	return db.Del(token).Err()
 }
 
 func CheckIfTokenItsValid(token string) (check bool, err error) {
-	key, err := getTokenHash(token)
-	if err != nil {
-		return
-	}
-
-	result, err := db.Get(key).Result()
+	result, err := db.Get(token).Result()
 	if err != nil {
 		if err.Error() == redis.Nil.Error() {
 			err = nil
@@ -60,7 +44,7 @@ func CheckIfTokenItsValid(token string) (check bool, err error) {
 		return
 	}
 
-	if result == token {
+	if result {
 		check = true
 	}
 	return
