@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/cfabrica46/go-crud/database/userdb"
@@ -22,6 +23,8 @@ func GetAllUsers(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, structure.ResponseHTTP{Code: http.StatusInternalServerError, ErrorText: "Error to get all users"})
 		return
 	}
+
+	fmt.Println("holas", users)
 
 	c.JSON(http.StatusOK, structure.ResponseHTTP{Code: http.StatusOK, Content: users})
 }

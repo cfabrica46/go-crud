@@ -2,17 +2,22 @@ package main
 
 import (
 	"log"
+	"os"
 
 	"github.com/cfabrica46/go-crud/database/userdb"
+	"github.com/joho/godotenv"
 )
 
 func main() {
 	defer userdb.Close()
 
-	r := setupRouter()
-
-	err := r.Run(":8080")
+	err := godotenv.Load(".env")
 	if err != nil {
-		log.Fatal(err)
+		log.Println("unread .env")
 	}
+
+	portHTTP := os.Getenv("PORT")
+	portHTTPS := os.Getenv("PORTHTTPS")
+
+	runServer(portHTTP, portHTTPS)
 }

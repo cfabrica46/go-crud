@@ -44,7 +44,7 @@ func CheckIfTokenItsValid(token string) (check bool, err error) {
 		return
 	}
 
-	if result {
+	if result == "true" {
 		check = true
 	}
 	return

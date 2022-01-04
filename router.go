@@ -11,6 +11,7 @@ import (
 )
 
 func runServer(portHTTP, portHTTPS string) {
+	// gin.SetMode(gin.ReleaseMode)
 	httpsRouter := setupRouterHTTPS()
 	httpRouter := setupRouterHTTP(portHTTPS)
 
