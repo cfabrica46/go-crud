@@ -9,8 +9,6 @@ import (
 	_ "github.com/lib/pq"
 )
 
-var db *sql.DB
-
 const (
 	PSQLHost     = "localhost"
 	PSQLPort     = 5431
@@ -20,37 +18,42 @@ const (
 	PSQLSSL      = "require"
 )
 
+var dbDriver = "postgres"
 var psqlInfo = fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s", PSQLHost, PSQLPort, PSQLUser, PSQLPassword, PSQLDBName, PSQLSSL)
 
+var db *sql.DB
+
 func init() {
-	err := Open()
+	var err error
+	db, err = Open()
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
-func Open() (err error) {
-	if db != nil {
-		err = errors.New("database is already open")
-		return
-	}
-
-	db, err = sql.Open("postgres", psqlInfo)
+func Open() (*sql.DB, error) {
+	var err error
+	db, err = sql.Open(dbDriver, psqlInfo)
 	if err != nil {
-		return
+		return nil, err
 	}
 	err = db.Ping()
 	if err != nil {
-		db.Close()
-		return
+		return nil, err
 	}
-	return
+	return db, err
 }
 
+/* func Get() *sql.DB {
+	return db
+} */
+
 func Close() (err error) {
-	err = db.Close()
-	if err != nil {
+	if db == nil {
+		err = errors.New("database already close")
 		return
 	}
+
+	defer db.Close()
 	return
 }

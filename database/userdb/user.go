@@ -14,10 +14,7 @@ func GetAllUsers() (users []structure.User, err error) {
 
 	for rows.Next() {
 		var userBeta structure.User
-		err = rows.Scan(&userBeta.ID, &userBeta.Username, &userBeta.Email)
-		if err != nil {
-			return
-		}
+		rows.Scan(&userBeta.ID, &userBeta.Username, &userBeta.Email)
 		users = append(users, userBeta)
 	}
 
@@ -38,21 +35,6 @@ func GetUserByID(id int) (user *structure.User, err error) {
 	user = &userBeta
 	return
 }
-
-/* func GetUserByUsername(username string) (user *structure.User, err error) {
-	var userBeta structure.User
-
-	row := db.QueryRow("SELECT users.id,users.username,users.password,users.email FROM users WHERE users.username = $1", username)
-	err = row.Scan(&userBeta.ID, &userBeta.Username, &userBeta.Password, &userBeta.Email)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			err = nil
-		}
-		return
-	}
-	user = &userBeta
-	return
-} */
 
 func GetUserByUsernameAndPassword(username, password string) (user *structure.User, err error) {
 	row := db.QueryRow("SELECT users.id, users.email FROM users WHERE users.username = $1 AND users.password = $2", username, password)
@@ -89,31 +71,39 @@ func CheckIfUserAlreadyExist(username string) (check bool, err error) {
 	return
 }
 
-func InsertUser(username, password, email string) (id int, err error) {
+func InsertUser(username, password, email string) (err error) {
 	stmt, err := db.Prepare("INSERT INTO users(username,password,email) VALUES ($1,$2,$3)")
 	if err != nil {
 		return
 	}
 
-	r, err := stmt.Exec(username, password, email)
+	_, err = stmt.Exec(username, password, email)
 	if err != nil {
 		return
 	}
-
-	id64, _ := r.LastInsertId()
-	id = int(id64)
 	return
 }
 
-func DeleteUserbByID(id int) (err error) {
+func DeleteUserbByID(id int) (count int, err error) {
 	stmt, err := db.Prepare("DELETE FROM users WHERE id = $1")
 	if err != nil {
 		return
 	}
 
-	_, err = stmt.Exec(id)
+	r, _ := stmt.Exec(id)
+	countAux, _ := r.RowsAffected()
+	count = int(countAux)
+	return
+}
+
+func DeleteUserbByUsername(username string) (count int, err error) {
+	stmt, err := db.Prepare("DELETE FROM users WHERE username = $1")
 	if err != nil {
 		return
 	}
+
+	r, _ := stmt.Exec(username)
+	countAux, _ := r.RowsAffected()
+	count = int(countAux)
 	return
 }
