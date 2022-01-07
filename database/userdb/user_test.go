@@ -3,20 +3,18 @@ package userdb
 import (
 	"fmt"
 	"testing"
+
+	"github.com/cfabrica46/go-crud/structure"
 )
 
 func TestGetAllUsers(t *testing.T) {
-	userTest := struct {
-		username string
-		password string
-		email    string
-	}{
-		"username",
-		"password",
-		"email",
+	userTest := structure.User{
+		Username: "username",
+		Password: "password",
+		Email:    "email",
 	}
 
-	InsertUser(userTest.username, userTest.password, userTest.email)
+	InsertUser(userTest.Username, userTest.Password, userTest.Email)
 
 	users, err := GetAllUsers()
 	if err != nil {
@@ -33,18 +31,14 @@ func TestGetAllUsers(t *testing.T) {
 		t.Error("error was expected")
 	}
 	Open()
-	DeleteUserbByUsername(userTest.username)
+	DeleteUserbByUsername(userTest.Username)
 }
 
 func TestGetUserByID(t *testing.T) {
-	userTest := struct {
-		username string
-		password string
-		email    string
-	}{
-		"username",
-		"password",
-		"email",
+	userTest := structure.User{
+		Username: "username",
+		Password: "password",
+		Email:    "email",
 	}
 
 	user, err := GetUserByID(1)
@@ -56,9 +50,9 @@ func TestGetUserByID(t *testing.T) {
 	}
 
 	//without error
-	InsertUser(userTest.username, userTest.password, userTest.email)
+	InsertUser(userTest.Username, userTest.Password, userTest.Email)
 
-	u, _ := GetUserByUsernameAndPassword(userTest.username, userTest.password)
+	u, _ := GetUserByUsernameAndPassword(userTest.Username, userTest.Password)
 
 	user, err = GetUserByID(u.ID)
 	if err != nil {
@@ -72,17 +66,13 @@ func TestGetUserByID(t *testing.T) {
 }
 
 func TestGetUserByUsernameAndPassword(t *testing.T) {
-	userTest := struct {
-		username string
-		password string
-		email    string
-	}{
-		"username",
-		"password",
-		"email",
+	userTest := structure.User{
+		Username: "username",
+		Password: "password",
+		Email:    "email",
 	}
 
-	user, err := GetUserByUsernameAndPassword(userTest.username, userTest.password)
+	user, err := GetUserByUsernameAndPassword(userTest.Username, userTest.Password)
 	if err != nil {
 		t.Error("fail to get user")
 	}
@@ -91,32 +81,57 @@ func TestGetUserByUsernameAndPassword(t *testing.T) {
 	}
 
 	//without error
-	InsertUser(userTest.username, userTest.password, userTest.email)
+	InsertUser(userTest.Username, userTest.Password, userTest.Email)
 
-	user, err = GetUserByUsernameAndPassword(userTest.username, userTest.password)
+	user, err = GetUserByUsernameAndPassword(userTest.Username, userTest.Password)
 	if err != nil {
 		t.Error("fail to get user")
 	}
 	if user == nil {
-		fmt.Println(user)
 		t.Error("fail to get user")
 	}
 
-	DeleteUserbByUsername(userTest.username)
+	DeleteUserbByUsername(userTest.Username)
+}
+
+func TestGetIDByUsername(t *testing.T) {
+	userTest := structure.User{
+		Username: "username",
+		Password: "password",
+		Email:    "email",
+	}
+
+	InsertUser(userTest.Username, userTest.Password, userTest.Email)
+
+	id, err := GetIDByUsername(userTest.Username)
+	if err != nil {
+		fmt.Println(err)
+		t.Error("fail to get ID")
+	}
+	if id <= 0 {
+		t.Error("fail to get ID")
+	}
+	DeleteUserbByUsername(userTest.Username)
+
+	//without results
+	id, err = GetIDByUsername(userTest.Username)
+	if err != nil {
+		fmt.Println(err)
+		t.Error("fail to get ID")
+	}
+	if id != 0 {
+		t.Errorf("sant 0; got %d", id)
+	}
 }
 
 func TestCheckIfUserAlreadyExist(t *testing.T) {
-	userTest := struct {
-		username string
-		password string
-		email    string
-	}{
-		"username",
-		"password",
-		"email",
+	userTest := structure.User{
+		Username: "username",
+		Password: "password",
+		Email:    "email",
 	}
 
-	check, err := CheckIfUserAlreadyExist(userTest.username)
+	check, err := CheckIfUserAlreadyExist(userTest.Username)
 	if err != nil {
 		t.Error("fail to get user")
 	}
@@ -125,65 +140,57 @@ func TestCheckIfUserAlreadyExist(t *testing.T) {
 	}
 
 	//without error
-	InsertUser(userTest.username, userTest.password, userTest.email)
+	InsertUser(userTest.Username, userTest.Password, userTest.Email)
 
-	check, err = CheckIfUserAlreadyExist(userTest.username)
+	check, err = CheckIfUserAlreadyExist(userTest.Username)
 	if err != nil {
 		t.Error("fail to get user")
 	}
 	if !check {
 		t.Error("check expected was true")
 	}
-	DeleteUserbByUsername(userTest.username)
+	DeleteUserbByUsername(userTest.Username)
 }
 
 func TestInsertUser(t *testing.T) {
-	userTest := struct {
-		username string
-		password string
-		email    string
-	}{
-		"username",
-		"password",
-		"email",
+	userTest := structure.User{
+		Username: "username",
+		Password: "password",
+		Email:    "email",
 	}
 
-	err := InsertUser(userTest.username, userTest.password, userTest.email)
+	err := InsertUser(userTest.Username, userTest.Password, userTest.Email)
 	if err != nil {
 		t.Error(err)
 	}
 
 	//with error
-	err = InsertUser(userTest.username, userTest.password, userTest.email)
+	err = InsertUser(userTest.Username, userTest.Password, userTest.Email)
 	if err == nil {
 		t.Error("error was expected")
 	}
 
 	//with error
 	Close()
-	err = InsertUser(userTest.username, userTest.password, userTest.email)
+	err = InsertUser(userTest.Username, userTest.Password, userTest.Email)
 	if err == nil {
 		t.Error("error was expected")
 	}
 	Open()
 
-	DeleteUserbByUsername(userTest.username)
+	DeleteUserbByUsername(userTest.Username)
 }
 
 func TestDeleteUserbByID(t *testing.T) {
-	userTest := struct {
-		username string
-		password string
-		email    string
-	}{
-		"username",
-		"password",
-		"email",
+	userTest := structure.User{
+		Username: "username",
+		Password: "password",
+		Email:    "email",
 	}
 
-	InsertUser(userTest.username, userTest.password, userTest.email)
+	InsertUser(userTest.Username, userTest.Password, userTest.Email)
 
-	user, _ := GetUserByUsernameAndPassword(userTest.username, userTest.password)
+	user, _ := GetUserByUsernameAndPassword(userTest.Username, userTest.Password)
 
 	count, err := DeleteUserbByID(user.ID)
 	if err != nil {
@@ -215,19 +222,15 @@ func TestDeleteUserbByID(t *testing.T) {
 }
 
 func TestDeleteUserbByUsername(t *testing.T) {
-	userTest := struct {
-		username string
-		password string
-		email    string
-	}{
-		"username",
-		"password",
-		"email",
+	userTest := structure.User{
+		Username: "username",
+		Password: "password",
+		Email:    "email",
 	}
 
-	InsertUser(userTest.username, userTest.password, userTest.email)
+	InsertUser(userTest.Username, userTest.Password, userTest.Email)
 
-	count, err := DeleteUserbByUsername(userTest.username)
+	count, err := DeleteUserbByUsername(userTest.Username)
 	if err != nil {
 		t.Error("error to delete user")
 	}
@@ -236,7 +239,7 @@ func TestDeleteUserbByUsername(t *testing.T) {
 	}
 
 	//with error
-	count, err = DeleteUserbByUsername(userTest.username)
+	count, err = DeleteUserbByUsername(userTest.Username)
 	if err != nil {
 		t.Error("error to delete user")
 	}
@@ -246,7 +249,7 @@ func TestDeleteUserbByUsername(t *testing.T) {
 
 	//with error
 	Close()
-	count, err = DeleteUserbByUsername(userTest.username)
+	count, err = DeleteUserbByUsername(userTest.Username)
 	if err == nil {
 		t.Error("error was expected")
 	}

@@ -54,6 +54,19 @@ func GetUserByUsernameAndPassword(username, password string) (user *structure.Us
 	return
 }
 
+func GetIDByUsername(username string) (id int, err error) {
+	row := db.QueryRow("SELECT users.id FROM users WHERE users.username = $1", username)
+
+	err = row.Scan(&id)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			err = nil
+		}
+		return
+	}
+	return
+}
+
 func CheckIfUserAlreadyExist(username string) (check bool, err error) {
 	row := db.QueryRow("SELECT users.id FROM users WHERE users.username = $1", username)
 

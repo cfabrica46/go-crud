@@ -18,7 +18,13 @@ func SignUp(c *gin.Context) {
 
 	passwordHash := newSha256([]byte(password))
 
-	id, err := userdb.InsertUser(username, string(passwordHash), email)
+	err := userdb.InsertUser(username, string(passwordHash), email)
+	if err != nil {
+		c.JSON(http.StatusConflict, structure.ResponseHTTP{Code: http.StatusConflict, ErrorText: "Conflict to insert user"})
+		return
+	}
+
+	id, err := userdb.GetIDByUsername(username)
 	if err != nil {
 		c.JSON(http.StatusConflict, structure.ResponseHTTP{Code: http.StatusConflict, ErrorText: "Conflict to insert user"})
 		return

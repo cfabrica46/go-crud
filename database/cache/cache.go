@@ -1,6 +1,7 @@
 package cache
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/go-redis/redis"
@@ -22,6 +23,14 @@ func Open() {
 	db = redis.NewClient(options)
 }
 
+func Close() (err error) {
+	err = db.Close()
+	if err != nil {
+		return
+	}
+	return
+}
+
 func SetToken(token string) (err error) {
 	err = db.Set(token, true, time.Minute*10).Err()
 	if err != nil {
@@ -34,7 +43,7 @@ func DeleteTokenUsingValue(token string) (err error) {
 	return db.Del(token).Err()
 }
 
-func CheckIfTokenItsValid(token string) (check bool, err error) {
+func TokenIsValid(token string) (check bool, err error) {
 	result, err := db.Get(token).Result()
 	if err != nil {
 		if err.Error() == redis.Nil.Error() {
@@ -43,8 +52,9 @@ func CheckIfTokenItsValid(token string) (check bool, err error) {
 		}
 		return
 	}
+	fmt.Println(result)
 
-	if result == "true" {
+	if result == "1" {
 		check = true
 	}
 	return
