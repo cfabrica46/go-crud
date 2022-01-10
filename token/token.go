@@ -7,12 +7,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func GenerateToken(id int, username, email, keyFile string, jwtMethod *jwt.SigningMethodHMAC) (tokenString string, err error) {
-	secret, err := ioutil.ReadFile(keyFile)
-	if err != nil {
-		return
-	}
-
+func GenerateToken(id int, username, email string, keyData []byte, jwtMethod *jwt.SigningMethodHMAC) (tokenString string, err error) {
 	token := jwt.NewWithClaims(jwtMethod, jwt.MapClaims{
 		"id":       id,
 		"username": username,
@@ -20,15 +15,12 @@ func GenerateToken(id int, username, email, keyFile string, jwtMethod *jwt.Signi
 		"uuid":     uuid.NewString(),
 	})
 
-	tokenString, err = token.SignedString(secret)
-	if err != nil {
-		return
-	}
+	tokenString, err = token.SignedString(keyData)
 	return
 }
 
-func ExtractClaims(tokenString, keyFile string, jwtMethod *jwt.SigningMethodHMAC) (id int, username, email string, err error) {
-	token, err := jwt.Parse(tokenString, keyFunc(jwtMethod, keyFile))
+func ExtractClaims(tokenString, keyFilePath string, jwtMethod *jwt.SigningMethodHMAC) (id int, username, email string, err error) {
+	token, err := jwt.Parse(tokenString, keyFunc(jwtMethod, keyFilePath))
 	if err != nil {
 		return
 	}
@@ -43,11 +35,11 @@ func ExtractClaims(tokenString, keyFile string, jwtMethod *jwt.SigningMethodHMAC
 	return
 }
 
-func keyFunc(jwtMethod *jwt.SigningMethodHMAC, keyFile string) func(token *jwt.Token) (interface{}, error) {
+func keyFunc(jwtMethod *jwt.SigningMethodHMAC, keyFilePath string) func(token *jwt.Token) (interface{}, error) {
 
 	return func(token *jwt.Token) (interface{}, error) {
 
-		secret, err := ioutil.ReadFile(keyFile)
+		secret, err := ioutil.ReadFile(keyFilePath)
 		if err != nil {
 			return nil, err
 		}

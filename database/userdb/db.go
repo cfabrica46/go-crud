@@ -44,10 +44,6 @@ func Open() (*sql.DB, error) {
 	return db, err
 }
 
-/* func Get() *sql.DB {
-	return db
-} */
-
 func Close() (err error) {
 	if db == nil {
 		err = errors.New("database already close")

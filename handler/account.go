@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"io/ioutil"
 	"net/http"
 
 	"github.com/cfabrica46/go-crud/database/cache"
@@ -30,7 +31,13 @@ func SignUp(c *gin.Context) {
 		return
 	}
 
-	userToken, err := token.GenerateToken(id, username, email, "key.pem", jwt.SigningMethodHS256)
+	keyData, err := ioutil.ReadFile("key.pem")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, structure.ResponseHTTP{Code: http.StatusInternalServerError, ErrorText: "Error Creating Token"})
+		return
+	}
+
+	userToken, err := token.GenerateToken(id, username, email, keyData, jwt.SigningMethodHS256)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, structure.ResponseHTTP{Code: http.StatusInternalServerError, ErrorText: "Error Creating Token"})
 		return
@@ -62,7 +69,13 @@ func SignIn(c *gin.Context) {
 		return
 	}
 
-	userToken, err := token.GenerateToken(user.ID, user.Username, user.Email, "key.pem", jwt.SigningMethodHS256)
+	keyData, err := ioutil.ReadFile("key.pem")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, structure.ResponseHTTP{Code: http.StatusInternalServerError, ErrorText: "Error Creating Token"})
+		return
+	}
+
+	userToken, err := token.GenerateToken(user.ID, user.Username, user.Email, keyData, jwt.SigningMethodHS256)
 	if err != nil {
 		c.JSON(http.StatusConflict, structure.ResponseHTTP{Code: http.StatusConflict, ErrorText: "Conflict to create token"})
 		return

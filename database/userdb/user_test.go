@@ -2,67 +2,82 @@ package userdb
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/cfabrica46/go-crud/structure"
 )
 
 func TestGetAllUsers(t *testing.T) {
-	userTest := structure.User{
-		Username: "username",
-		Password: "password",
-		Email:    "email",
-	}
+	for i, tt := range []struct {
+		in  structure.User
+		out string
+	}{
+		{structure.User{Username: "username", Password: "password", Email: "email"}, ""},
+		{structure.User{Username: "username", Password: "password", Email: "email"}, "database is closed"},
+	} {
+		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+			if tt.out == "database is closed" {
+				err := Close()
+				if err != nil {
+					t.Error(err)
+				}
+				defer Open()
+			} else if tt.out == "" {
+				err := InsertUser(tt.in.Username, tt.in.Password, tt.in.Email)
+				if err != nil {
+					t.Error(err)
+				}
+				defer DeleteUserbByUsername(tt.in.Username)
+			}
 
-	InsertUser(userTest.Username, userTest.Password, userTest.Email)
-
-	users, err := GetAllUsers()
-	if err != nil {
-		t.Error("Fail to get all users")
+			_, err := GetAllUsers()
+			if err != nil {
+				if !strings.Contains(err.Error(), tt.out) {
+					t.Errorf("want %v; got %v", tt.out, err)
+				}
+			}
+		})
 	}
-	if len(users) < 1 {
-		t.Error("Fail to get all users")
-	}
-
-	//error
-	Close()
-	_, err = GetAllUsers()
-	if err == nil {
-		t.Error("error was expected")
-	}
-	Open()
-	DeleteUserbByUsername(userTest.Username)
 }
 
 func TestGetUserByID(t *testing.T) {
-	userTest := structure.User{
-		Username: "username",
-		Password: "password",
-		Email:    "email",
-	}
+	for i, tt := range []struct {
+		in  structure.User
+		out structure.User
+	}{
+		{structure.User{ID: -1}, structure.User{}},
+		{structure.User{Username: "username", Password: "password", Email: "email"}, structure.User{Username: "username", Password: "password", Email: "email"}},
+	} {
+		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+			if tt.in.ID != -1 {
+				err := InsertUser(tt.in.Username, tt.in.Password, tt.in.Email)
+				if err != nil {
+					t.Error(err)
+				}
+				defer DeleteUserbByUsername(tt.in.Username)
+			}
 
-	user, err := GetUserByID(1)
-	if err != nil {
-		t.Error("fail to get user")
-	}
-	if user != nil {
-		t.Error("user expected was nil")
-	}
+			id, err := GetIDByUsername(tt.in.Username)
+			if err != nil {
+				t.Error(err)
+			}
 
-	//without error
-	InsertUser(userTest.Username, userTest.Password, userTest.Email)
-
-	u, _ := GetUserByUsernameAndPassword(userTest.Username, userTest.Password)
-
-	user, err = GetUserByID(u.ID)
-	if err != nil {
-		t.Error("fail to get user")
+			user, err := GetUserByID(id)
+			if err != nil {
+				t.Error(err)
+			}
+			if tt.in.ID == -1 {
+				if user != nil {
+					t.Errorf("want %v; got %v", tt.out, user)
+				}
+			} else {
+				if user == nil {
+					t.Errorf("want %v; got %v", tt.out, user)
+				}
+			}
+		})
 	}
-	if user == nil {
-		fmt.Println(user)
-		t.Error("fail to get user")
-	}
-	DeleteUserbByID(u.ID)
 }
 
 func TestGetUserByUsernameAndPassword(t *testing.T) {
