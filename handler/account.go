@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -18,8 +19,9 @@ func SignUp(c *gin.Context) {
 	email := c.MustGet("email").(string)
 
 	passwordHash := newSha256([]byte(password))
+	password = fmt.Sprintf("%x", passwordHash)
 
-	err := userdb.InsertUser(username, string(passwordHash), email)
+	err := userdb.InsertUser(username, password, email)
 	if err != nil {
 		c.JSON(http.StatusConflict, structure.ResponseHTTP{Code: http.StatusConflict, ErrorText: "Conflict to insert user"})
 		return
@@ -31,14 +33,18 @@ func SignUp(c *gin.Context) {
 		return
 	}
 
-	keyData, err := ioutil.ReadFile("key.pem")
+	keyData, err := ioutil.ReadFile("server.key")
 	if err != nil {
+		fmt.Println(1)
+		fmt.Println(err)
 		c.JSON(http.StatusInternalServerError, structure.ResponseHTTP{Code: http.StatusInternalServerError, ErrorText: "Error Creating Token"})
 		return
 	}
 
 	userToken, err := token.GenerateToken(id, username, email, keyData, jwt.SigningMethodHS256)
 	if err != nil {
+		fmt.Println(2)
+		fmt.Println(err)
 		c.JSON(http.StatusInternalServerError, structure.ResponseHTTP{Code: http.StatusInternalServerError, ErrorText: "Error Creating Token"})
 		return
 	}
@@ -58,8 +64,9 @@ func SignIn(c *gin.Context) {
 	// email := c.MustGet("email").(string)
 
 	passwordHash := newSha256([]byte(password))
+	password = fmt.Sprintf("%x", passwordHash)
 
-	user, err := userdb.GetUserByUsernameAndPassword(username, string(passwordHash))
+	user, err := userdb.GetUserByUsernameAndPassword(username, password)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, structure.ResponseHTTP{Code: http.StatusInternalServerError, ErrorText: "Error Sign In"})
 		return
@@ -69,7 +76,7 @@ func SignIn(c *gin.Context) {
 		return
 	}
 
-	keyData, err := ioutil.ReadFile("key.pem")
+	keyData, err := ioutil.ReadFile("server.key")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, structure.ResponseHTTP{Code: http.StatusInternalServerError, ErrorText: "Error Creating Token"})
 		return

@@ -34,7 +34,7 @@ func GetUserFromToken(c *gin.Context) {
 		return
 	}
 
-	check, err := cache.CheckIfTokenItsValid(tokenStructure.Token)
+	check, err := cache.TokenIsValid(tokenStructure.Token)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, structure.ResponseHTTP{Code: http.StatusInternalServerError, ErrorText: "Error Verifying Token"})
 		return

@@ -1,7 +1,6 @@
 package cache
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/go-redis/redis"
@@ -52,7 +51,6 @@ func TokenIsValid(token string) (check bool, err error) {
 		}
 		return
 	}
-	fmt.Println(result)
 
 	if result == "1" {
 		check = true
