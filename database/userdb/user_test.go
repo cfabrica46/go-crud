@@ -50,7 +50,7 @@ func TestGetUserByID(t *testing.T) {
 		{structure.User{Username: "username", Password: "password", Email: "email"}, structure.User{Username: "username", Password: "password", Email: "email"}},
 	} {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
-			if tt.in.ID != -1 {
+			if tt.in.ID == 0 {
 				err := InsertUser(tt.in.Username, tt.in.Password, tt.in.Email)
 				if err != nil {
 					t.Error(err)
@@ -81,195 +81,228 @@ func TestGetUserByID(t *testing.T) {
 }
 
 func TestGetUserByUsernameAndPassword(t *testing.T) {
-	userTest := structure.User{
-		Username: "username",
-		Password: "password",
-		Email:    "email",
-	}
+	for i, tt := range []struct {
+		in  structure.User
+		out structure.User
+	}{
+		{structure.User{}, structure.User{}},
+		{structure.User{Username: "username", Password: "password", Email: "email"}, structure.User{Username: "username", Password: "password", Email: "email"}},
+	} {
+		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+			if tt.in.Username == "username" {
+				err := InsertUser(tt.in.Username, tt.in.Password, tt.in.Email)
+				if err != nil {
+					t.Error(err)
+				}
+				defer DeleteUserbByUsername(tt.in.Username)
+			}
 
-	user, err := GetUserByUsernameAndPassword(userTest.Username, userTest.Password)
-	if err != nil {
-		t.Error("fail to get user")
-	}
-	if user != nil {
-		t.Error("user expected was nil")
-	}
+			user, err := GetUserByUsernameAndPassword(tt.in.Username, tt.in.Password)
+			if err != nil {
+				t.Error(err)
+			}
 
-	//without error
-	InsertUser(userTest.Username, userTest.Password, userTest.Email)
-
-	user, err = GetUserByUsernameAndPassword(userTest.Username, userTest.Password)
-	if err != nil {
-		t.Error("fail to get user")
+			if tt.in.Username != "username" {
+				if user != nil {
+					t.Errorf("want %v; got %v", tt.out, user)
+				}
+			} else {
+				if user == nil {
+					t.Errorf("want %v; got %v", tt.out, user)
+				}
+			}
+		})
 	}
-	if user == nil {
-		t.Error("fail to get user")
-	}
-
-	DeleteUserbByUsername(userTest.Username)
 }
 
 func TestGetIDByUsername(t *testing.T) {
-	userTest := structure.User{
-		Username: "username",
-		Password: "password",
-		Email:    "email",
-	}
+	for i, tt := range []struct {
+		in  structure.User
+		out int
+	}{
+		{structure.User{}, 0},
+		{structure.User{Username: "username", Password: "password", Email: "email"}, 1},
+	} {
+		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+			if tt.in.Username == "username" {
+				err := InsertUser(tt.in.Username, tt.in.Password, tt.in.Email)
+				if err != nil {
+					t.Error(err)
+				}
+				defer DeleteUserbByUsername(tt.in.Username)
+			}
 
-	InsertUser(userTest.Username, userTest.Password, userTest.Email)
+			id, err := GetIDByUsername(tt.in.Username)
+			if err != nil {
+				t.Error(err)
+			}
 
-	id, err := GetIDByUsername(userTest.Username)
-	if err != nil {
-		fmt.Println(err)
-		t.Error("fail to get ID")
-	}
-	if id <= 0 {
-		t.Error("fail to get ID")
-	}
-	DeleteUserbByUsername(userTest.Username)
-
-	//without results
-	id, err = GetIDByUsername(userTest.Username)
-	if err != nil {
-		fmt.Println(err)
-		t.Error("fail to get ID")
-	}
-	if id != 0 {
-		t.Errorf("sant 0; got %d", id)
+			if tt.in.Username != "username" {
+				if id != tt.out {
+					t.Errorf("want %v; got %v", tt.out, id)
+				}
+			} else {
+				if id < tt.out {
+					t.Errorf("want %v; got %v", tt.out, id)
+				}
+			}
+		})
 	}
 }
 
 func TestCheckIfUserAlreadyExist(t *testing.T) {
-	userTest := structure.User{
-		Username: "username",
-		Password: "password",
-		Email:    "email",
-	}
+	for i, tt := range []struct {
+		in  structure.User
+		out bool
+	}{
+		{structure.User{}, false},
+		{structure.User{Username: "username", Password: "password", Email: "email"}, true},
+	} {
+		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+			if tt.in.Username == "username" {
+				err := InsertUser(tt.in.Username, tt.in.Password, tt.in.Email)
+				if err != nil {
+					t.Error(err)
+				}
+				defer DeleteUserbByUsername(tt.in.Username)
+			}
 
-	check, err := CheckIfUserAlreadyExist(userTest.Username)
-	if err != nil {
-		t.Error("fail to get user")
-	}
-	if check {
-		t.Error("check expected was false")
-	}
+			check, err := CheckIfUserAlreadyExist(tt.in.Username)
+			if err != nil {
+				t.Error("fail to get user")
+			}
 
-	//without error
-	InsertUser(userTest.Username, userTest.Password, userTest.Email)
-
-	check, err = CheckIfUserAlreadyExist(userTest.Username)
-	if err != nil {
-		t.Error("fail to get user")
+			if check != tt.out {
+				t.Errorf("want %v; got %v", tt.out, check)
+			}
+		})
 	}
-	if !check {
-		t.Error("check expected was true")
-	}
-	DeleteUserbByUsername(userTest.Username)
 }
 
 func TestInsertUser(t *testing.T) {
-	userTest := structure.User{
-		Username: "username",
-		Password: "password",
-		Email:    "email",
-	}
+	for i, tt := range []struct {
+		in  structure.User
+		out string
+	}{
+		{structure.User{}, "database is closed"},
+		{structure.User{Username: "username", Password: "password", Email: "email"}, ""},
+		{structure.User{}, "duplicate key value"},
+	} {
+		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+			if tt.out == "database is closed" {
+				err := Close()
+				if err != nil {
+					t.Error(err)
+				}
+			}
 
-	err := InsertUser(userTest.Username, userTest.Password, userTest.Email)
-	if err != nil {
-		t.Error(err)
-	}
+			err := InsertUser(tt.in.Username, tt.in.Password, tt.in.Email)
+			if err != nil {
+				if !strings.Contains(err.Error(), tt.out) {
+					t.Errorf("want %v; got %v", tt.out, err)
+				}
+			}
 
-	//with error
-	err = InsertUser(userTest.Username, userTest.Password, userTest.Email)
-	if err == nil {
-		t.Error("error was expected")
-	}
+			if tt.out == "database is closed" {
+				Open()
+			}
 
-	//with error
-	Close()
-	err = InsertUser(userTest.Username, userTest.Password, userTest.Email)
-	if err == nil {
-		t.Error("error was expected")
-	}
-	Open()
+			if tt.out != "" {
+				_, err = DeleteUserbByUsername(tt.in.Username)
+				if err != nil {
+					t.Error(err)
+				}
+				_, err = DeleteUserbByUsername("username")
+				if err != nil {
+					t.Error(err)
+				}
+			}
 
-	DeleteUserbByUsername(userTest.Username)
+		})
+	}
 }
 
 func TestDeleteUserbByID(t *testing.T) {
-	userTest := structure.User{
-		Username: "username",
-		Password: "password",
-		Email:    "email",
-	}
+	for i, tt := range []struct {
+		in    structure.User
+		out   int
+		error string
+	}{
+		{structure.User{Username: "username", Password: "password", Email: "email"}, 1, ""},
+		{structure.User{}, 0, ""},
+		{structure.User{}, 0, "database is closed"},
+	} {
+		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+			if tt.error == "database is closed" {
+				err := Close()
+				if err != nil {
+					t.Error(err)
+				}
+				defer Open()
+			}
 
-	InsertUser(userTest.Username, userTest.Password, userTest.Email)
+			var id int
 
-	user, _ := GetUserByUsernameAndPassword(userTest.Username, userTest.Password)
+			if tt.in.Username == "username" {
+				err := InsertUser(tt.in.Username, tt.in.Password, tt.in.Email)
+				if err != nil {
+					t.Error(err)
+				}
 
-	count, err := DeleteUserbByID(user.ID)
-	if err != nil {
-		t.Error("error to delete user")
-	}
-	if count != 1 {
-		t.Error("count expected was 1")
-	}
+				id, err = GetIDByUsername(tt.in.Username)
+				if err != nil {
+					t.Error(err)
+				}
+			}
 
-	//with error
-	count, err = DeleteUserbByID(user.ID)
-	if err != nil {
-		t.Error("error to delete user")
+			count, err := DeleteUserbByID(id)
+			if tt.out == 1 {
+				if err != nil {
+					t.Error(err)
+				}
+				if count != 1 {
+					t.Errorf("want %v; got %v", tt.out, err)
+				}
+			}
+		})
 	}
-	if count != 0 {
-		t.Error("count expected was 0")
-	}
-
-	//with error
-	Close()
-	count, err = DeleteUserbByID(user.ID)
-	if err == nil {
-		t.Error("error was expected")
-	}
-	if count != 0 {
-		t.Error("count expected was 0")
-	}
-	Open()
 }
 
 func TestDeleteUserbByUsername(t *testing.T) {
-	userTest := structure.User{
-		Username: "username",
-		Password: "password",
-		Email:    "email",
-	}
+	for i, tt := range []struct {
+		in    structure.User
+		out   int
+		error string
+	}{
+		{structure.User{Username: "username", Password: "password", Email: "email"}, 1, ""},
+		{structure.User{}, 0, ""},
+		{structure.User{}, 0, "database is closed"},
+	} {
+		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+			if tt.error == "database is closed" {
+				err := Close()
+				if err != nil {
+					t.Error(err)
+				}
+				defer Open()
+			}
 
-	InsertUser(userTest.Username, userTest.Password, userTest.Email)
+			if tt.in.Username == "username" {
+				err := InsertUser(tt.in.Username, tt.in.Password, tt.in.Email)
+				if err != nil {
+					t.Error(err)
+				}
+			}
 
-	count, err := DeleteUserbByUsername(userTest.Username)
-	if err != nil {
-		t.Error("error to delete user")
+			count, err := DeleteUserbByUsername(tt.in.Username)
+			if tt.out == 1 {
+				if err != nil {
+					t.Error(err)
+				}
+				if count != 1 {
+					t.Errorf("want %v; got %v", tt.out, err)
+				}
+			}
+		})
 	}
-	if count != 1 {
-		t.Error("count expected was 1")
-	}
-
-	//with error
-	count, err = DeleteUserbByUsername(userTest.Username)
-	if err != nil {
-		t.Error("error to delete user")
-	}
-	if count != 0 {
-		t.Error("count expected was 0")
-	}
-
-	//with error
-	Close()
-	count, err = DeleteUserbByUsername(userTest.Username)
-	if err == nil {
-		t.Error("error was expected")
-	}
-	if count != 0 {
-		t.Error("count expected was 0")
-	}
-	Open()
 }
