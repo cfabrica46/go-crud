@@ -1,43 +1,55 @@
 package cache
 
-import "testing"
-
-/* func TestOpen(t *testing.T) {
-} */
+import (
+	"fmt"
+	"strings"
+	"testing"
+)
 
 func TestClose(t *testing.T) {
-	err := Close()
-	if err != nil {
-		t.Error("error to close cache")
+	for i, tt := range []struct {
+		out string
+	}{
+		{""},
+		{"client is closed"},
+	} {
+		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+			err := Close()
+			if err != nil {
+				if !strings.Contains(err.Error(), tt.out) {
+					t.Errorf("want %v; got %v", tt.out, err)
+				}
+				Open()
+			}
+		})
 	}
-	err = Close()
-	if err == nil {
-		t.Error("want err; got nil")
-	}
-
-	Open()
 }
 
 func TestSetToken(t *testing.T) {
-	valueTest := "test"
+	for i, tt := range []struct {
+		in  string
+		out string
+	}{
+		{"token", ""},
+		{"", "client is closed"},
+	} {
+		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+			if tt.in == "" {
+				err := Close()
+				if err != nil {
+					t.Error(err)
+				}
+				defer Open()
+			}
 
-	err := SetToken(valueTest)
-	if err != nil {
-		t.Error("error to set token")
+			err := SetToken(tt.in)
+			if err != nil {
+				if !strings.Contains(err.Error(), tt.out) {
+					t.Errorf("want %v; got %v", tt.out, err)
+				}
+			}
+		})
 	}
-
-	//with error
-	err = Close()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	err = SetToken(valueTest)
-	if err == nil {
-		t.Error("want error; got nil")
-	}
-
-	Open()
 }
 
 func TestDeleteTokenUsingvalue(t *testing.T) {
@@ -50,7 +62,42 @@ func TestDeleteTokenUsingvalue(t *testing.T) {
 }
 
 func TestTokenIsValid(t *testing.T) {
-	valueTest := "test"
+	for i, tt := range []struct {
+		in  string
+		out bool
+	}{
+		{"", false},
+		{"close", false},
+		{"token", true},
+	} {
+		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+			if tt.in == "close" {
+				err := Close()
+				if err != nil {
+					t.Error(err)
+				}
+				defer Open()
+			}
+
+			if tt.in == "token" {
+				err := SetToken(tt.in)
+				if err != nil {
+					t.Error(err)
+				}
+			}
+
+			check, err := TokenIsValid(tt.in)
+			if tt.in != "close" {
+				if err != nil {
+					t.Error(err)
+				}
+			}
+			if check != tt.out {
+				t.Errorf("want %v; got %v", !check, check)
+			}
+		})
+	}
+	/* valueTest := "test"
 
 	check, err := TokenIsValid(valueTest)
 	if err != nil {
@@ -88,5 +135,5 @@ func TestTokenIsValid(t *testing.T) {
 		t.Errorf("want %v; got %v", !check, check)
 	}
 
-	Open()
+	Open() */
 }
